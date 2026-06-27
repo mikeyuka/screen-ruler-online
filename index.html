@@ -150,5 +150,35 @@
       });
     }
   </script>
+
+  <!-- High-Performance Lazy Loaded Google AdSense -->
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      let adSenseLoaded = false;
+      function loadAdSense() {
+        if (adSenseLoaded) return;
+        adSenseLoaded = true;
+        
+        // Remove trigger event listeners
+        window.removeEventListener('scroll', loadAdSense);
+        window.removeEventListener('mousemove', loadAdSense);
+        window.removeEventListener('touchstart', loadAdSense);
+        
+        // Dynamically append AdSense script tag
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3497048730596385";
+        script.crossOrigin = "anonymous";
+        document.head.appendChild(script);
+        console.log("AdSense lazy-loaded.");
+      }
+      
+      // Load 3 seconds after page load or instantly upon user interaction (whichever comes first)
+      setTimeout(loadAdSense, 3000);
+      window.addEventListener('scroll', loadAdSense, { passive: true });
+      window.addEventListener('mousemove', loadAdSense, { passive: true });
+      window.addEventListener('touchstart', loadAdSense, { passive: true });
+    });
+  </script>
 </body>
 </html>
