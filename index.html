@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Screen Ruler Online - Compact Measurement Suite</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
+  <header class="p-4 flex justify-between items-center bg-white dark:bg-gray-800 shadow">
+    <h1 class="text-xl font-bold">Screen Ruler Online</h1>
+    <button id="theme-toggle" class="p-2 border rounded">
+      <span id="theme-toggle-light-icon">☀️</span>
+      <span id="theme-toggle-dark-icon" class="hidden">🌙</span>
+    </button>
+  </header>
+  <nav class="flex justify-center space-x-2 my-4">
+    <button onclick="switchTab('panel-ruler')" class="px-4 py-2 bg-blue-600 text-white rounded">Ruler</button>
+    <button onclick="switchTab('panel-calibration')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded">Calibration</button>
+    <button onclick="switchTab('panel-protractor')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded">Protractor</button>
+    <button onclick="switchTab('panel-converter')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded">Converter</button>
+  </nav>
+  <main class="max-w-4xl mx-auto p-4">
+    <!-- Panel 1: Ruler -->
+    <section id="panel-ruler" class="tab-panel bg-white dark:bg-gray-800 p-6 rounded shadow space-y-4">
+      <div class="flex flex-wrap gap-2 items-center">
+        <button id="ruler-rotate-btn" class="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded">
+          <span id="resize-icon">🔄</span> Rotate
+        </button>
+        <input type="range" id="ruler-width-slider" class="w-32">
+        <input type="number" id="ruler-width-input" class="w-20 p-1 border rounded dark:bg-gray-700">
+        <label><input type="checkbox" id="ruler-lock-checkbox"> Lock</label>
+        <button class="ruler-color-btn w-6 h-6 rounded-full bg-red-500" data-color="red"></button>
+        <button class="ruler-color-btn w-6 h-6 rounded-full bg-blue-500" data-color="blue"></button>
+        <button id="reset-ruler-btn" class="px-3 py-1 bg-red-500 text-white rounded">Reset</button>
+      </div>
+      <div class="grid grid-cols-4 gap-4 text-center">
+        <div>Width: <span id="ruler-w-info">-</span></div>
+        <div>Height: <span id="ruler-h-info">-</span></div>
+        <div>Inches: <span id="ruler-l-in">-</span></div>
+        <div>CM: <span id="ruler-l-cm">-</span></div>
+      </div>
+    </section>
+    <!-- Panel 2: Calibration -->
+    <section id="panel-calibration" class="tab-panel hidden bg-white dark:bg-gray-800 p-6 rounded shadow space-y-4">
+      <div class="grid grid-cols-3 gap-2">
+        <div class="calib-obj-card p-2 border rounded cursor-pointer" data-key="card_width">Card Width</div>
+        <div class="calib-obj-card p-2 border rounded cursor-pointer" data-key="card_height">Card Height</div>
+        <div class="calib-obj-card p-2 border rounded cursor-pointer" data-key="dollar_width">Dollar Width</div>
+      </div>
+      <div class="relative flex justify-center py-8">
+        <div id="calibration-target-box" class="border-2 border-dashed border-blue-500 w-64 h-40 relative">
+          <div id="calibration-resize-handle" class="absolute right-0 bottom-0 w-4 h-4 bg-blue-500 cursor-se-resize"></div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <input type="range" id="calibration-width-slider" class="flex-1">
+        <span id="calibration-width-px-val">256px</span>
+        <button id="calib-dec-btn" class="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">-</button>
+        <button id="calib-inc-btn" class="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">+</button>
+      </div>
+      <div class="flex justify-between items-center bg-gray-50 dark:bg-gray-700 p-3 rounded">
+        <span>PPI: <strong id="calibration-realtime-ppi">96</strong></span>
+        <button id="apply-calibration-btn" class="px-4 py-2 bg-green-600 text-white rounded">Save</button>
+      </div>
+      <div class="flex items-center gap-2">
+        <input type="number" id="manual-ppi-input" class="p-1 border rounded w-24 dark:bg-gray-700">
+        <button id="manual-ppi-dec" class="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">-</button>
+        <button id="manual-ppi-inc" class="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">+</button>
+        <button id="reset-ppi-btn" class="px-3 py-1 bg-red-500 text-white rounded">Reset PPI</button>
+      </div>
+    </section>
+    <!-- Panel 3: Protractor -->
+    <section id="panel-protractor" class="tab-panel hidden bg-white dark:bg-gray-800 p-6 rounded shadow space-y-4">
+      <div class="relative w-full overflow-hidden bg-gray-50 dark:bg-gray-700 rounded flex justify-center">
+        <svg id="protractor-svg" viewBox="0 0 600 400" class="w-full max-w-2xl h-auto">
+          <circle id="protractor-bg-circle" cx="300" cy="200" r="180" fill="none" stroke="currentColor" stroke-opacity="0.1" stroke-width="20"></circle>
+          <g id="protractor-ticks-group"></g>
+          <path id="protractor-arc-fill" d="" fill="rgba(59, 130, 246, 0.2)"></path>
+          <line id="protractor-arm1-line" x1="300" y1="200" x2="450" y2="200" stroke="#3b82f6" stroke-width="4"></line>
+          <line id="protractor-arm2-line" x1="300" y1="200" x2="300" y2="50" stroke="#ef4444" stroke-width="4"></line>
+          <circle id="protractor-pivot-handle" cx="300" cy="200" r="10" fill="#10b981" class="cursor-pointer"></circle>
+          <circle id="protractor-arm1-handle" cx="450" cy="200" r="12" fill="#3b82f6" class="cursor-pointer"></circle>
+          <circle id="protractor-arm2-handle" cx="300" cy="50" r="12" fill="#ef4444" class="cursor-pointer"></circle>
+        </svg>
+      </div>
+      <div class="flex justify-between items-center flex-wrap gap-4">
+        <label class="flex items-center gap-2"><input type="checkbox" id="protractor-reflex-toggle"> Reflex Angle</label>
+        <div class="flex gap-4 font-mono text-lg">
+          <span>Deg: <span id="angle-deg">0</span>°</span>
+          <span>Rad: <span id="angle-rad">0</span></span>
+          <span>Pi: <span id="angle-pi">0π</span></span>
+        </div>
+      </div>
+    </section>
+    <!-- Panel 4: Converter -->
+    <section id="panel-converter" class="tab-panel hidden bg-white dark:bg-gray-800 p-6 rounded shadow space-y-4">
+      <div class="grid grid-cols-3 gap-4">
+        <div><label>Pixels (px)</label><input type="number" id="conv-px" class="w-full p-2 border rounded dark:bg-gray-700"></div>
+        <div><label>Inches (in)</label><input type="number" id="conv-in" class="w-full p-2 border rounded dark:bg-gray-700"></div>
+        <div><label>Centimeters (cm)</label><input type="number" id="conv-cm" class="w-full p-2 border rounded dark:bg-gray-700"></div>
+        <div><label>Millimeters (mm)</label><input type="number" id="conv-mm" class="w-full p-2 border rounded dark:bg-gray-700"></div>
+        <div><label>Feet (ft)</label><input type="number" id="conv-ft" class="w-full p-2 border rounded dark:bg-gray-700"></div>
+        <div><label>Meters (m)</label><input type="number" id="conv-m" class="w-full p-2 border rounded dark:bg-gray-700"></div>
+        <div><label>Points (pt)</label><input type="number" id="conv-pt" class="w-full p-2 border rounded dark:bg-gray-700"></div>
+        <div><label>EM (em)</label><input type="number" id="conv-em" class="w-full p-2 border rounded dark:bg-gray-700"></div>
+        <div><label>REM (rem)</label><input type="number" id="conv-rem" class="w-full p-2 border rounded dark:bg-gray-700"></div>
+      </div>
+      <div class="flex gap-2">
+        <button class="quick-conv-btn px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded" data-value="1" data-unit="in">1 in</button>
+        <button class="quick-conv-btn px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded" data-value="10" data-unit="cm">10 cm</button>
+      </div>
+    </section>
+  </main>
+  <!-- Floating Ruler -->
+  <div id="floating-ruler" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 shadow-lg border border-gray-300 dark:border-gray-700 rounded-lg p-2 flex flex-col cursor-move" style="width: 500px; height: 120px; touch-action: none;">
+    <div id="ruler-content" class="relative flex-1 bg-amber-50 dark:bg-amber-900 border border-amber-200 dark:border-amber-800 rounded">
+      <svg id="ruler-scale-svg" class="w-full h-full absolute inset-0"></svg>
+    </div>
+    <div id="ruler-resize-handle" class="absolute right-0 bottom-0 w-5 h-5 bg-amber-400 dark:bg-amber-700 rounded-bl-lg cursor-se-resize flex items-center justify-center text-xs text-white">↘</div>
+  </div>
+  <!-- Toast -->
+  <div id="toast-notification" class="fixed bottom-4 right-4 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 px-4 py-2 rounded shadow-lg transition-all duration-300 transform translate-y-20 opacity-0 flex items-center gap-2">
+    <span id="toast-message"></span>
+  </div>
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+      const floatRuler = document.getElementById('floating-ruler');
+      if (tabId === 'panel-ruler') {
+        floatRuler.classList.remove('hidden');
+      } else {
+        floatRuler.classList.add('hidden');
+      }
+    }
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      document.getElementById('theme-toggle-light-icon').classList.toggle('hidden');
+      document.getElementById('theme-toggle-dark-icon').classList.toggle('hidden');
+    });
+  </script>
+  <script src="app.js" defer></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker registered successfully:', reg))
+          .catch(err => console.error('Service Worker registration failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>
